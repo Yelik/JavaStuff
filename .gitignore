@@ -6,6 +6,7 @@
 bin/
 tmp/
 .plugins/
+.metadata/
 *.tmp
 *.bak
 *.swp
