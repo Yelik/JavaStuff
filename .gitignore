@@ -5,7 +5,7 @@
 *.pydevproject
 bin/
 tmp/
-.metadata/
+.plugins/
 *.tmp
 *.bak
 *.swp
