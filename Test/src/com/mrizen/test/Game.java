@@ -71,7 +71,6 @@ public class Game extends Canvas implements Runnable {
 			}
 			render();
 			frames++;
-
 			if (System.currentTimeMillis() - timer > 1000) {
 				timer += 1000;
 				frame.setTitle(title + " | " + updates + " ups, " + frames + " fps");
@@ -83,7 +82,7 @@ public class Game extends Canvas implements Runnable {
 	}
 
 	public void update() {
-
+		
 	}
 
 	public void render() {
