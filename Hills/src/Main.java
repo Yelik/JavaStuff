@@ -1,47 +1,41 @@
-package com.mrizen.test;
-
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.Random;
 
 import javax.swing.JFrame;
 
-public class Game extends Canvas implements Runnable {
+public class Main extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
+	public static Random random;
 
-	public static int width = 300;
-	public static int height = width / 16 * 9;
-	public static int scale = 3;
-
-	private static String title = "Test";
-
-	private Thread thread;
+	private final String title = "Rain";
 	private JFrame frame;
-	private boolean running = false;
-	private Screen screen;
+
+	public int width = 300;
+	public int height = width / 16 * 9;
+	public int scale = 6;
+
 	private BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-	private Keyboard key;
-	private Level level;
-	private EntityPlayer player;
-	private Mouse mouse;
 
-	public Game() {
+	private boolean running = true;
+
+	private Screen screen;
+	private Thread thread;
+	private double i;
+	private double t;
+
+	public Main() {
 		Dimension size = new Dimension(width * scale, height * scale);
 		setPreferredSize(size);
-
 		frame = new JFrame();
 		screen = new Screen(width, height);
-		key = new Keyboard();
-		level = new SpawnLevel("/textures/level.png");
-		player = new EntityPlayer(key);
-
-		addKeyListener(key);
-		addMouseListener(mouse);
-		addMouseMotionListener(mouse);
+		i = 1;
+		t = 1;
 	}
 
 	public synchronized void start() {
@@ -59,6 +53,7 @@ public class Game extends Canvas implements Runnable {
 		}
 	}
 
+	@Override
 	public void run() {
 		long lastTime = System.nanoTime();
 		long timer = System.currentTimeMillis();
@@ -85,15 +80,9 @@ public class Game extends Canvas implements Runnable {
 				frames = 0;
 			}
 		}
-		stop();
 	}
 
-	public void update() {
-		key.update();
-		player.update();
-	}
-
-	public void render() {
+	private void render() {
 		BufferStrategy bs = getBufferStrategy();
 		if (bs == null) {
 			createBufferStrategy(3);
@@ -101,10 +90,7 @@ public class Game extends Canvas implements Runnable {
 		}
 
 		screen.clear();
-		int xScroll = player.x - screen.width / 2;
-		int yScroll = player.y - screen.height / 2;
-		level.render(xScroll, yScroll, screen);
-		player.render(screen);
+		screen.render((int) i, (int) t);
 
 		for (int i = 0; i < pixels.length; i++) {
 			pixels[i] = screen.pixels[i];
@@ -116,16 +102,23 @@ public class Game extends Canvas implements Runnable {
 		bs.show();
 	}
 
-	public static void main(String[] args) {
-		Game game = new Game();
-		game.frame.setResizable(false);
-		game.frame.setTitle(title);
-		game.frame.add(game);
-		game.frame.pack();
-		game.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		game.frame.setLocationRelativeTo(null);
-		game.frame.setVisible(true);
+	private void update() {
+		i *= 1.01;
+		t += 1;
+	}
 
-		game.start();
+	public static void main(String[] args) {
+		Main.random = new Random();
+
+		Main main = new Main();
+		main.frame.setResizable(false);
+		main.frame.setTitle(main.title);
+		main.frame.add(main);
+		main.frame.pack();
+		main.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		main.frame.setLocationRelativeTo(null);
+		main.frame.setVisible(true);
+
+		main.start();
 	}
 }

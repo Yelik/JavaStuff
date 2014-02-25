@@ -4,51 +4,53 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
-import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JFrame;
 
 public class Main extends Canvas implements Runnable {
-	private static String title = "Checkers";
-	private static final long serialVersionUID = 1L;
-	private static boolean running;
-	private static float scale = (float) 1.5;
+	private static final long serialVersionUID = -5461790717007009799L;
+	private static Main main;
 
-	public static int width = Sprite.tileWidth * 8;
-	public static int height = Sprite.tileHeight * 8;
-
-	private Thread thread;
+	private final String title;
 	private JFrame frame;
+	private Thread thread;
+	private int width;
+	private int height;
+	private int scale;
+	private boolean running;
 	private Screen screen;
+	private Map map;
 	private int[] pixels;
 	private BufferedImage image;
-	private Mouse mouse;
-	private Board board;
-	public static Random rand;
+
+	public static Random random;
 
 	public Main() {
-		Dimension size = new Dimension((int) (width * scale), (int) (height * scale));
-		setPreferredSize(size);
-		frame = new JFrame();
-		screen = new Screen(width, height);
+
+		int tileWidth = 32, mapWidth = 8, mapHeight = 8;
+		scale = 6;
+		title = "Rain";
+
+		width = tileWidth * mapWidth;
+		height = width / 16 * 9;
+		setPreferredSize(new Dimension(width * scale, height * scale));
+
 		image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
-		mouse = new Mouse();
-		board = new Board(Board.width, Board.height);
-		board.setUp();
-		rand = new Random();
-		addMouseListener(mouse);
-		addMouseMotionListener(mouse);
+
+		frame = new JFrame();
+		screen = new Screen(width, height);
+		map = new Map(mapWidth, mapHeight);
 	}
 
-	public void start() {
+	private synchronized void start() {
 		running = true;
 		thread = new Thread(this, "Display");
 		thread.start();
 	}
 
-	public void stop() {
+	public synchronized void stop() {
 		running = false;
 		try {
 			thread.join();
@@ -57,28 +59,30 @@ public class Main extends Canvas implements Runnable {
 		}
 	}
 
+	@Override
 	public void run() {
 		long lastTime = System.nanoTime();
 		long timer = System.currentTimeMillis();
-		final double ns = 1000000000.0 / 1.0;
+		final double ns = 1000000000.0 / 60.0;
 		double delta = 0;
 		int frames = 0;
-		int updates = 0;
+		int ticks = 0;
+		requestFocus();
 		while (running) {
 			long now = System.nanoTime();
 			delta += (now - lastTime) / ns;
 			lastTime = now;
 			while (delta > 1) {
-				update();
-				updates++;
+				tick();
+				ticks++;
 				delta--;
 			}
 			render();
 			frames++;
 			if (System.currentTimeMillis() - timer > 1000) {
 				timer += 1000;
-				frame.setTitle(title + " | " + updates + " ups, " + frames + " fps");
-				updates = 0;
+				frame.setTitle(title + " | " + ticks + " TPS " + frames + " FPS");
+				ticks = 0;
 				frames = 0;
 			}
 		}
@@ -91,48 +95,48 @@ public class Main extends Canvas implements Runnable {
 			return;
 		}
 		screen.clear();
-		board.render(screen);
+		map.render(screen);
+
 		for (int i = 0; i < pixels.length; i++) {
 			pixels[i] = screen.pixels[i];
 		}
+
 		Graphics g = bs.getDrawGraphics();
 		g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
 		g.dispose();
 		bs.show();
 	}
 
-	private void update() {
-		int id;
-		if (board.turn == Checker.red.id) {
-			id = Checker.red.id;
-			/*int x = mouse.getX() / Sprite.tileWidth, y = mouse.getY() / Sprite.tileHeight;
-			if (mouse.getLeftButton()) {
-				board.setSelected(x, y);
-			}
-			if (mouse.getRightButton()) {
-				board.moveTo(x, y);
-			}*/
+	private void tick() {
+		map.tick();
+	}
 
-		} else {
-			id = Checker.blue.id;
-		}
-		ArrayList<Move> moves = board.think(2, id);
-		if (moves.size() != 0) {
-			moves.get(0).execute(board);
-		} else {
-			System.exit(0);
-		}
+	public static int getMainWidth() {
+		return main.width;
+	}
+
+	public static int getMainHeight() {
+		return main.height;
+	}
+
+	public static Map getMap() {
+		return main.map;
 	}
 
 	public static void main(String[] args) {
-		Main main = new Main();
+		random = new Random();
+		main = new Main();
+
 		main.frame.setResizable(false);
-		main.frame.setTitle(title);
+		main.frame.setTitle(main.title);
 		main.frame.add(main);
 		main.frame.pack();
 		main.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		main.frame.setLocationRelativeTo(null);
 		main.frame.setVisible(true);
+
+		main.map.generateMap(0);
+
 		main.start();
 	}
 }
