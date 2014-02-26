@@ -28,11 +28,11 @@ public class Main extends Canvas implements Runnable {
 
 	public Main() {
 
-		int tileWidth = 32, mapWidth = 8, mapHeight = 8;
+		int mapWidth = 32, mapHeight = 32;
 		scale = 6;
 		title = "Rain";
 
-		width = tileWidth * mapWidth;
+		width = 300;
 		height = width / 16 * 9;
 		setPreferredSize(new Dimension(width * scale, height * scale));
 

@@ -6,24 +6,28 @@ public class TileFlowable extends Tile {
 
 	@Override
 	public void tick(Map map) {
-		if (getWater() > 1) {
-			flow(map, 0, 1);
-		}
+		if (getX() == 4)
+			setWater(getMaxWater());
+		flow(map, 0, 1);
+		flow(map, -1, -1);
+		flow(map, 1, -1);
 	}
 
 	private void flow(Map map, int x, int y) {
-		Tile t = map.getTile(x, y);
+		Tile t = map.getTile(x + getX(), y + getY());
 		if (t == null || !t.isFlowable()) {
 			return;
 		}
-		System.out.println(2);
 		int water = t.getWater(), maxWater = t.getMaxWater();
-		if (water > getWater() || water == maxWater) {
+		if (water >= getWater() || water == maxWater) {
 			return;
 		}
 
 		int totalWater = water + getWater(), equalWater = totalWater / 2;
-		setWater(equalWater);
+		if (totalWater % 2 == 1)
+			setWater(equalWater + 1);
+		else
+			setWater(equalWater);
 		t.setWater(equalWater);
 	}
 }

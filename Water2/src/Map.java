@@ -15,9 +15,6 @@ public class Map {
 					setTile(new TileWall(x, y));
 				else
 					setTile(new TileFlowable(x, y));
-				if (y == 1) {
-					getTile(x, y).setWater(2);
-				}
 			}
 		}
 	}
@@ -47,6 +44,9 @@ public class Map {
 	}
 
 	public Tile getTile(int x, int y) {
+		int i = y * getWidth() + x;
+		if (i >= tiles.length || i < 0)
+			return null;
 		return tiles[y * getWidth() + x];
 	}
 }

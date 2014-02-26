@@ -46,6 +46,6 @@ public class Tile {
 	}
 
 	public void tick(Map map) {
-		System.out.println(this);
+		
 	}
 }
