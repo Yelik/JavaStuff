@@ -29,7 +29,7 @@ public class Screen {
 	public void addWater(int xp, int yp, int width, int height, int color) {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				int i = y * width + x, ip = (yp + y) * this.width + (xp + x);
+				int ip = (yp + y) * this.width + (xp + x);
 				if (ip >= pixels.length || ip < 0) {
 					continue;
 				}

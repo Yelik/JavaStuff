@@ -33,6 +33,9 @@ public class Map {
 		for (int i = 0; i < tiles.length; i++) {
 			tiles[i].tick(this);
 		}
+		for (int i = 0; i < tiles.length; i++) {
+			tiles[i].tick2(this);
+		}
 	}
 
 	public int getHeight() {

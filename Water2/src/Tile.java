@@ -46,6 +46,10 @@ public class Tile {
 	}
 
 	public void tick(Map map) {
-		
+
+	}
+
+	public void tick2(Map map) {
+
 	}
 }
