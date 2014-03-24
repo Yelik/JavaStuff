@@ -11,6 +11,12 @@ public class Node {
 		this.count = count;
 	}
 
+	public Node(int x, int y, Point from, int count) {
+		this.pos = new Point(x, y);
+		this.from = from;
+		this.count = count;
+	}
+
 	public int getPosX() {
 		return pos.x;
 	}

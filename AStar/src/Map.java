@@ -6,6 +6,7 @@ import java.util.Random;
 import com.mrizen.gaming.KeyReader;
 import com.mrizen.gaming.MouseReader;
 import com.mrizen.gaming.Screen;
+import com.mrizen.gaming.Sprite;
 
 public class Map {
 	private int width;
@@ -35,10 +36,17 @@ public class Map {
 	public void render(Screen screen) {
 		for (int y = 0; y < getHeight(); y++) {
 			for (int x = 0; x < getWidth(); x++) {
-				if (getPathId(x, y) == 0)
+				int path = getPathId(x, y);
+				if (path == 0)
 					getTile(x, y).render(screen, x, y);
-				else
-					screen.drawSprite(x * Sprites.GRAY.getSize(), y * Sprites.GRAY.getSize(), Sprites.GRAY);
+				else {
+					if (path > 64) {
+						path -= 64;
+					}
+					Sprite sprite = Sprites.PATHS[Sprites.PATHS.length - path];
+					screen.drawSprite(x * sprite.getSize(), y * sprite.getSize(), sprite);
+				}
+
 			}
 		}
 		if (hasStart())
@@ -55,17 +63,71 @@ public class Map {
 	}
 
 	private void pathfind() {
+		paths = new int[tiles.length];
 		ArrayList<Node> opens = new ArrayList<Node>();
 		ArrayList<Node> closed = new ArrayList<Node>();
 		opens.add(new Node(end, null, 0));
-		while (!closed.contains(new Node(start, null, 0)) && opens.size() > 0) {
+		while (!(contains(closed, new Node(start, null, 0))) && opens.size() > 0) {
+			sortNodeList(opens);
 			Node n = opens.get(0);
 			for (int y = -1; y < 2; y++) {
-				int yp = y + n.getPosY();
-				for (int x = -1; x < 2; x++) {
-					int xp = x + n.getPosX();
-					
+				Node n2 = new Node(n.getPosX(), y + n.getPosY(), n.getPos(), n.getCount() + 1);
+				if (n2.getPosX() >= 0 && n2.getPosX() < getWidth() && n2.getPosY() >= 0 && n2.getPosY() < getHeight() && !contains(opens, n2) && !contains(closed, n2)
+						&& !getTile(n2.getPosX(), n2.getPosY()).isSolid())
+					opens.add(n2);
+			}
+			for (int x = -1; x < 2; x++) {
+				Node n2 = new Node(x + n.getPosX(), n.getPosY(), n.getPos(), n.getCount() + 1);
+				if (n2.getPosX() >= 0 && n2.getPosX() < getWidth() && n2.getPosY() >= 0 && n2.getPosY() < getHeight() && !contains(opens, n2) && !contains(closed, n2)
+						&& !getTile(n2.getPosX(), n2.getPosY()).isSolid())
+					opens.add(n2);
+			}
+			closed.add(n);
+			opens.remove(0);
+		}
+		Node[] nodes = new Node[getWidth() * getHeight()];
+		for (int i = 0; i < closed.size(); i++) {
+			Node n = closed.get(i);
+			int i2 = n.getPosY() * getWidth() + n.getPosX();
+			if (i2 >= 0 && i2 < nodes.length)
+				nodes[i2] = n;
+		}
+		Node n = nodes[start.y * getWidth() + start.x];
+		if (n != null)
+			while (n.getFrom() != null) {
+				int i = n.getPosY() * getWidth() + n.getPosX(), i2 = n.getFromY() * getWidth() + n.getFromX();
+				if (i < 0 || i >= tiles.length || i2 < 0 || i2 >= tiles.length) {
+					continue;
 				}
+				paths[i] = n.getCount();
+				n = nodes[n.getFromY() * getWidth() + n.getFromX()];
+			}
+	}
+
+	private boolean contains(ArrayList<Node> nodes, Node node) {
+		for (int i = 0; i < nodes.size(); i++) {
+			if (node.equals(nodes.get(i)))
+				return true;
+		}
+		return false;
+	}
+
+	private void sortNodeList(ArrayList<Node> nodes) {
+		ArrayList<Node> temp = (ArrayList<Node>) nodes.clone();
+		nodes.clear();
+		nodes.add(temp.get(0));
+		boolean end = false;
+		for (int i = 1; i < temp.size(); i++) {
+			for (int i2 = 0; i2 < nodes.size(); i2++) {
+				if (temp.get(i).getCount() < nodes.get(i2).getCount()) {
+					nodes.add(i2, temp.get(i));
+					end = false;
+					break;
+				}
+				end = true;
+			}
+			if (end) {
+				nodes.add(temp.get(i));
 			}
 		}
 	}
@@ -116,13 +178,15 @@ public class Map {
 			setEnd(tile.x, tile.y);
 			repath = true;
 		}
-		if (repath) {
+		if (repath && hasStart() && hasEnd() && start.x != end.x && start.y != end.y) {
 			pathfind();
 		}
 	}
 
 	private void setTile(int x, int y, int id) {
-		tiles[y * getWidth() + x] = id;
+		int i = y * getWidth() + x;
+		if (i >= 0 && i < tiles.length)
+			tiles[y * getWidth() + x] = id;
 	}
 
 	private void setEnd(int x, int y) {

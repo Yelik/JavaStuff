@@ -9,6 +9,7 @@ public class Game extends Main {
 		super(title, width, height, scale, updatesPerSecond);
 		map = new Map(width / Tile.EMPTY.getSprite().getSize(), height / Tile.EMPTY.getSprite().getSize());
 		showCursor(false);
+		Sprites.makeSprites();
 	}
 
 	protected void render() {
