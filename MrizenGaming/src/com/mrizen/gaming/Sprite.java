@@ -9,42 +9,38 @@ public class Sprite {
 	public static final int BLUE = 0xFF0000FF;
 	public static final int GRAY = 0xC0C0C0;
 
-	private final int SIZE;
+	private Array2D pixels;
 
-	private int[] pixels;
-
-	public Sprite(int SIZE) {
-		this.SIZE = SIZE;
-		pixels = new int[SIZE * SIZE];
+	public Sprite(int size) {
+		pixels = new Array2D(size, size);
 	}
 
 	public Sprite drawFill(int color) {
-		for (int i = 0; i < pixels.length; i++) {
-			pixels[i] = color;
+		for (int i = 0; i < pixels.getLength(); i++) {
+			pixels.setI(i, color);
 		}
 		return this;
 	}
 
 	public Sprite drawLoad(int xa, int ya, Spritesheet sheet) {
-		for (int y = 0; y < SIZE; y++) {
-			int yp = ya * SIZE + y;
-			for (int x = 0; x < SIZE; x++) {
-				int xp = xa * SIZE + x;
-				int ip = yp * sheet.getWidth() + xp, i = y * SIZE + x;
-				if (ip < 0 || ip >= sheet.pixels.length || i < 0 || i >= SIZE) {
+		for (int y = 0; y < getSize(); y++) {
+			int yp = ya * getSize() + y;
+			for (int x = 0; x < getSize(); x++) {
+				int xp = xa * getSize() + x;
+				if (xp < 0 || yp < 0 || xp >= sheet.getPixels().getWidth() || yp >= sheet.getPixels().getHeight()) {
 					continue;
 				}
-				pixels[i] = sheet.pixels[ip];
+				pixels.set(x, y, sheet.getPixels().get(xp, yp));
 			}
 		}
 		return this;
 	}
 
 	public int getSize() {
-		return SIZE;
+		return pixels.getWidth();
 	}
 
-	public int[] getPixels() {
+	public Array2D getPixels() {
 		return pixels;
 	}
 }

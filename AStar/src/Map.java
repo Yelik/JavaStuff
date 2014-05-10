@@ -97,7 +97,7 @@ public class Map {
 			while (n.getFrom() != null) {
 				int i = n.getPosY() * getWidth() + n.getPosX(), i2 = n.getFromY() * getWidth() + n.getFromX();
 				if (i < 0 || i >= tiles.length || i2 < 0 || i2 >= tiles.length) {
-					continue;
+					break;
 				}
 				paths[i] = n.getCount();
 				n = nodes[n.getFromY() * getWidth() + n.getFromX()];

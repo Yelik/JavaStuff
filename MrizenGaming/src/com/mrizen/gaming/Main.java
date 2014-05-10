@@ -25,16 +25,22 @@ public class Main extends Canvas implements Runnable {
 	private double updatesPerSecond;
 	private KeyReader keys;
 	private MouseReader mouse;
+	private int anim;
 
-	public Main(String title, int width, int height, double scale, double updatesPerSecond) {
+	public Main(String title, int width, int height, double hScale, double vScale, double updatesPerSecond) {
 		this.title = title;
 		this.updatesPerSecond = updatesPerSecond;
+		anim = 0;
+
+		mouse = new MouseReader();
+		addMouseMotionListener(mouse);
+		addMouseListener(mouse);
 
 		frame = new JFrame();
 		frame.setResizable(false);
 		frame.setTitle(title);
 		frame.add(this);
-		setDimension(width, height, scale);
+		setDimension(width, height, hScale, vScale);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
@@ -43,10 +49,6 @@ public class Main extends Canvas implements Runnable {
 
 		keys = new KeyReader();
 		addKeyListener(keys);
-
-		mouse = new MouseReader(scale);
-		addMouseMotionListener(mouse);
-		addMouseListener(mouse);
 
 		image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
@@ -62,8 +64,9 @@ public class Main extends Canvas implements Runnable {
 		return mouse;
 	}
 
-	protected void setDimension(int width, int height, double scale) {
-		setPreferredSize(new Dimension((int) (width * scale), (int) (height * scale)));
+	protected void setDimension(int width, int height, double hScale, double vScale) {
+		setPreferredSize(new Dimension((int) (width * hScale), (int) (height * vScale)));
+		mouse.setScale(hScale, vScale);
 		frame.pack();
 	}
 
@@ -75,20 +78,22 @@ public class Main extends Canvas implements Runnable {
 
 	}
 
+	private void updatePrivate() {
+		anim++;
+		update();
+	}
+
 	private void renderPrivate() {
 		BufferStrategy bs = getBufferStrategy();
 		if (bs == null) {
 			createBufferStrategy(3);
 			return;
 		}
-
 		screen.clear();
 		render();
-
-		for (int i = 0; i < pixels.length; i++) {
-			pixels[i] = screen.pixels[i];
+		for (int i = 0; i < screen.getPixels().getLength(); i++) {
+			pixels[i] = screen.getPixels().getI(i);
 		}
-
 		Graphics g = bs.getDrawGraphics();
 		g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
 		g.dispose();
@@ -109,7 +114,7 @@ public class Main extends Canvas implements Runnable {
 			delta += (now - lastTime) / ns;
 			lastTime = now;
 			while (delta > 1) {
-				update();
+				updatePrivate();
 				updates++;
 				delta--;
 			}
@@ -139,17 +144,6 @@ public class Main extends Canvas implements Runnable {
 		}
 	}
 
-	public static void main(String[] args) {
-		String title = "Test";
-		int width = 300;
-		int height = width / 16 * 9;
-		int scale = 6;
-		double updatesPerSecond = 60;
-
-		Main main = new Main(title, width, height, scale, updatesPerSecond);
-		main.start();
-	}
-
 	public Screen getScreen() {
 		return screen;
 	}
@@ -158,5 +152,9 @@ public class Main extends Canvas implements Runnable {
 		BufferedImage cursorImg = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
 		Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(cursorImg, new Point(0, 0), "blank cursor");
 		frame.getContentPane().setCursor(blankCursor);
+	}
+
+	public int getAnim() {
+		return anim;
 	}
 }

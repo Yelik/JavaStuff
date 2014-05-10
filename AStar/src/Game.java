@@ -6,7 +6,7 @@ public class Game extends Main {
 	private Map map;
 
 	public Game(String title, int width, int height, double scale, double updatesPerSecond) {
-		super(title, width, height, scale, updatesPerSecond);
+		super(title, width, height, scale, scale, updatesPerSecond);
 		map = new Map(width / Tile.EMPTY.getSprite().getSize(), height / Tile.EMPTY.getSprite().getSize());
 		showCursor(false);
 		Sprites.makeSprites();

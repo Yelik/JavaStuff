@@ -9,13 +9,20 @@ public class MouseReader implements MouseListener, MouseMotionListener {
 	private int mouseX;
 	private int mouseY;
 	private int mouseB;
-	private double scale;
+	private double hScale;
+	private double vScale;
 
-	public MouseReader(double scale) {
-		this.scale = scale;
+	public MouseReader() {
+		hScale = 1;
+		vScale = 1;
 		mouseX = -1;
 		mouseY = -1;
 		mouseB = -1;
+	}
+
+	public void setScale(double hScale, double vScale) {
+		this.hScale = hScale;
+		this.vScale = vScale;
 	}
 
 	public int getX() {
@@ -23,11 +30,11 @@ public class MouseReader implements MouseListener, MouseMotionListener {
 	}
 
 	public int getScaledX() {
-		return (int) Math.round(mouseX / scale);
+		return (int) Math.round(mouseX / hScale);
 	}
 
 	public int getScaledY() {
-		return (int) Math.round(mouseY / scale);
+		return (int) Math.round(mouseY / vScale);
 	}
 
 	public int getY() {
